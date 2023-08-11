@@ -1,4 +1,4 @@
-# Demonstrates the IR sensors on the 3pi+ robot: the left and right
+# Demonstrates the IR sensors on the Zumo robot: the left and right
 # bump sensors on the front of the robot and the five downward-looking
 # reflectance/line sensors.
 #
@@ -7,7 +7,7 @@
 # Press C to switch the line sensors to display calibrated or
 # uncalibrated values.
 
-from pololu_3pi_2040_robot import robot
+from zumo_2040_robot import robot
 import time
 
 line_sensors = robot.LineSensors()

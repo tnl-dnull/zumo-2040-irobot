@@ -9,8 +9,8 @@
 # slower functions like updating the display without impacting the
 # speed of the main loop.
 
-from pololu_3pi_2040_robot import robot
-from pololu_3pi_2040_robot.extras import editions
+from zumo_2040_robot import robot
+from zumo_2040_robot.extras import editions
 import time
 import _thread
 
@@ -87,7 +87,7 @@ def update_display():
         display.text("Press A to stop", 0, 10)
     else:
         display.text("Press A to start", 0, 10)
-    
+
     ms = (t2 - t1)/1000
     display.text(f"Main loop: {ms:.1f}ms", 0, 20)
     display.text('p = '+str(p), 0, 30)
@@ -134,7 +134,7 @@ def follow_line():
         min_speed = 0
         left = max(min_speed, min(max_speed, max_speed + pid))
         right = max(min_speed, min(max_speed, max_speed - pid))
-        
+
         if run_motors:
             motors.set_speeds(left, right)
         else:

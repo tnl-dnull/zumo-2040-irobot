@@ -1,4 +1,4 @@
-# Pololu 3pi+ 2040 Robot default main.py
+# Pololu Zumo 2040 Robot default main.py
 #
 # This script displays the logo screen and gives you
 # several options to proceed:
@@ -28,7 +28,7 @@
 # replace this script with your own main.py.
 
 try:
-    from pololu_3pi_2040_robot.extras.splash_loader import splash_loader
+    from zumo_2040_robot.extras.splash_loader import splash_loader
     splash_loader(
         default_program = None, # "my_program.py"
         splash_delay_s = 6, # delay while waiting for a button
@@ -36,30 +36,30 @@ try:
         )
 
 except Exception as e:
-    from pololu_3pi_2040_robot.motors import Motors
+    from zumo_2040_robot.motors import Motors
     Motors()   # turn off Motors ASAP
     exc = e    # enable access to original exception in REPL
-    from pololu_3pi_2040_robot.rgb_leds import RGBLEDs
+    from zumo_2040_robot.rgb_leds import RGBLEDs
     RGBLEDs()  # turn off RGB LEDs
-    from pololu_3pi_2040_robot.buzzer import Buzzer
+    from zumo_2040_robot.buzzer import Buzzer
     buzzer = Buzzer()
 
-    from pololu_3pi_2040_robot.display import Display
+    from zumo_2040_robot.display import Display
     Display.show_exception(e)
     buzzer.play("O2c4")
     raise
 
 finally:
-    from pololu_3pi_2040_robot.motors import Motors
+    from zumo_2040_robot.motors import Motors
     Motors()   # turn off Motors ASAP
-    from pololu_3pi_2040_robot.buzzer import Buzzer
+    from zumo_2040_robot.buzzer import Buzzer
     Buzzer()   # turn off Buzzer
-    from pololu_3pi_2040_robot.rgb_leds import RGBLEDs
+    from zumo_2040_robot.rgb_leds import RGBLEDs
     RGBLEDs()  # turn off RGB LEDs
 
     # don't leave extra classes lying around
     del Motors, Buzzer, RGBLEDs, splash_loader
 
     # make the REPL friendlier, if you enter it the right way
-    from pololu_3pi_2040_robot import robot
+    from zumo_2040_robot import robot
     import sys

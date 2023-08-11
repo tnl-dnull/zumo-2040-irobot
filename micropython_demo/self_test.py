@@ -1,5 +1,5 @@
 import machine
-from pololu_3pi_2040_robot import robot
+from zumo_2040_robot import robot
 import sys
 import time
 
@@ -54,7 +54,7 @@ def run_test():
 
     buzzer.play_in_background(BEEP_WELCOME)
 
-    display_centered_text('3pi+ 2040')
+    display_centered_text('Zumo 2040')
     display_line_break()
     display_centered_text('Self Test')
     time.sleep_ms(500)

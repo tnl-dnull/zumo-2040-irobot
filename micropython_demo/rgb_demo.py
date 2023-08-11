@@ -1,6 +1,6 @@
 # Demonstrates smooth color cycling on the RGB LEDs.
 
-from pololu_3pi_2040_robot import robot
+from zumo_2040_robot import robot
 import time
 import math
 

@@ -1,8 +1,8 @@
-# Run this test with the 3pi on a white surface
+# Run this test with the Zumo on a white surface
 # such as a piece of paper to verify that the
 # library works.
 
-from pololu_3pi_2040_robot import robot
+from zumo_2040_robot import robot
 import time
 import array
 

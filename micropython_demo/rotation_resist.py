@@ -1,21 +1,21 @@
-# This demo shows how the 3pi+ can use its gyroscope to detect when it is being
+# This demo shows how the Zumo can use its gyroscope to detect when it is being
 # rotated, and use the motors to resist that rotation.
 #
 # In the "Choose edition" menu, use the A and C buttons to select what type of
-# 3pi+ robot you have and then press B to confirm.
+# Zumo robot you have and then press B to confirm.
 #
 # Do not move the robot while it says "Calibrating..." on the screen.
 #
 # After the calibration is done, press button A to start the motors.
-# If you try to turn the 3pi+, or put it on a surface that is turning, it will
+# If you try to turn the Zumo, or put it on a surface that is turning, it will
 # drive its motors to counteract the turning.  This demo only uses the Z axis
-# of the gyro, so it is possible to pick up the 3pi+, rotate it about its X
+# of the gyro, so it is possible to pick up the Zumo, rotate it about its X
 # and Y axes, and then put it down facing in a new position.
 #
 # This example is similar to gyro_turn.py.
 
-from pololu_3pi_2040_robot import robot
-from pololu_3pi_2040_robot.extras import editions
+from zumo_2040_robot import robot
+from zumo_2040_robot.extras import editions
 import time
 
 motors = robot.Motors()

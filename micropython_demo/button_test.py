@@ -1,4 +1,4 @@
-# This example shows how to read the buttons on the Pololu 3pi+ 2040 Robot.
+# This example shows how to read the buttons on the Pololu Zumo 2040 Robot.
 # This includes the three pushbuttons on the control board and the two bump
 # sensors on the front of the robot, which can be used as buttons.
 #
@@ -8,7 +8,7 @@
 # This demo configures button A with an unusually high debounce time of 500 ms
 # so you can see the debouncing effect by pressing the button quickly.
 
-from pololu_3pi_2040_robot import robot
+from zumo_2040_robot import robot
 
 display = robot.Display()
 button_a = robot.ButtonA()

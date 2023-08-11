@@ -1,6 +1,6 @@
 # This program prints out some basic information about the system.
 
-from pololu_3pi_2040_robot import robot
+from zumo_2040_robot import robot
 import sys
 import gc
 import os
@@ -48,7 +48,7 @@ while True:
     display.text("RAM: {:.01f}k/{:.0f}k".format(ram_used_kb, ram_total_kb), 0, 33)
     display.text("Press B...", 0, 57)
     display.show()
-    
+
     while not button_b.check():
         pass
 

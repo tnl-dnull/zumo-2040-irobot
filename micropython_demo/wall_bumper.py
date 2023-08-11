@@ -1,8 +1,8 @@
-# This example makes the 3pi+ 2040 drive forward until it hits a wall, detect
+# This example makes the Zumo 2040 drive forward until it hits a wall, detect
 # the collision with its bumpers, then reverse, turn, and keep driving.
 
-from pololu_3pi_2040_robot import robot
-from pololu_3pi_2040_robot.extras import editions
+from zumo_2040_robot import robot
+from zumo_2040_robot.extras import editions
 import time
 
 motors = robot.Motors()

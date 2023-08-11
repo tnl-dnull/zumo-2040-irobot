@@ -1,6 +1,6 @@
 # Demo of music playing with callbacks for LED and display effects.
 
-from pololu_3pi_2040_robot import robot
+from zumo_2040_robot import robot
 
 buzzer = robot.Buzzer()
 display = robot.Display()

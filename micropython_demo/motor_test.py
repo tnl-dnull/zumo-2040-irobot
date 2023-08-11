@@ -6,7 +6,7 @@
 #
 # Encoder counts are displayed on the bottom two lines of the OLED.
 
-from pololu_3pi_2040_robot import robot
+from zumo_2040_robot import robot
 import time
 
 display = robot.Display()

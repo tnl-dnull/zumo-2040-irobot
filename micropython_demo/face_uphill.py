@@ -1,11 +1,11 @@
-# This demo uses the accelerometer on the 3pi+ to detect whether it is on a
+# This demo uses the accelerometer on the Zumo to detect whether it is on a
 # slanted surface.  If it is on a slanted surface, then it uses the motors to
 # face uphill.
 #
 # It also uses the encoders to avoid rolling down the surface.
 
-from pololu_3pi_2040_robot import robot
-from pololu_3pi_2040_robot.extras import editions
+from zumo_2040_robot import robot
+from zumo_2040_robot.extras import editions
 import time
 
 motors = robot.Motors()

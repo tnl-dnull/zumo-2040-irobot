@@ -1,7 +1,7 @@
 # This demo spins the robot in place by driving one motor forward and
 # the other back, while playing a tune on the buzzer.
 
-from pololu_3pi_2040_robot import robot
+from zumo_2040_robot import robot
 import time
 
 rgb_leds = robot.RGBLEDs()

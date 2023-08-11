@@ -1,10 +1,10 @@
-# Functions for selecting what edition of the 3pi+ 2040 is being used:
+# Functions for selecting what edition of the Zumo 2040 is being used:
 # Standard, Turtle, or Hyper.
 
-from pololu_3pi_2040_robot.extras.menu import Menu
-from pololu_3pi_2040_robot.display import Display
-from pololu_3pi_2040_robot.buttons import ButtonA, ButtonB, ButtonC
-from pololu_3pi_2040_robot.buzzer import Buzzer
+from zumo_2040_robot.extras.menu import Menu
+from zumo_2040_robot.display import Display
+from zumo_2040_robot.buttons import ButtonA, ButtonB, ButtonC
+from zumo_2040_robot.buzzer import Buzzer
 
 editions = [ "Standard", "Turtle", "Hyper" ]
 

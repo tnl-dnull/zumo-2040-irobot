@@ -14,7 +14,7 @@ class Encoders:
         self._flip_sign = -1 if flip else 1
 
     def get_counts(self, reset = False):
-        # Sign on the 3pi encoders is reversed from what
+        # Sign on the Zumo encoders is reversed from what
         # the PIO counter gives us.
         left = - self.left.read() - self.left_offset
         right = - self.right.read() - self.right_offset

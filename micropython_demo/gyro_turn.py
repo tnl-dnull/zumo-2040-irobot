@@ -1,15 +1,15 @@
 # This example make the robot turn 90 degrees using the gyroscope.
 #
 # In the "Choose edition" menu, use the A and C buttons to select what type of
-# 3pi+ robot you have and then press B to confirm.  Then press button A or C
+# Zumo robot you have and then press B to confirm.  Then press button A or C
 # to make the robot turn.
 #
 # If you need the turn to be more accurate, you might consider calibrating the
 # gyro (see rotation_resist.py), but that doesn't make much difference for
 # short turns.
 
-from pololu_3pi_2040_robot import robot
-from pololu_3pi_2040_robot.extras import editions
+from zumo_2040_robot import robot
+from zumo_2040_robot.extras import editions
 import time
 
 angle_to_turn = 90
