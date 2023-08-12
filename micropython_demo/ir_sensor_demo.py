@@ -11,7 +11,6 @@ from zumo_2040_robot import robot
 import time
 
 line_sensors = robot.LineSensors()
-bump_sensors = robot.BumpSensors()
 display = robot.Display()
 last_update = 0
 button_a = robot.ButtonA()
@@ -21,8 +20,6 @@ calibrate = 0
 use_calibrated_read = False
 
 while True:
-    bump = bump_sensors.read()
-
     # Start a background read; we'll time how long the
     # non-blocking part takes later.
     line_sensors.start_read()
@@ -62,13 +59,6 @@ while True:
     if button_a.check():
         last_update = 0 # force display refresh
         if calibrate == 0:
-            bump_sensors.calibrate()
-            display.fill_rect(0, 10, 128, 20, 0)
-            display.text('calibrated bump', 0, 10)
-            display.text('sensors...', 0, 20)
-            display.show()
-            time.sleep_ms(500)
-
             calibrate = 1 # calibrate line sensors
         else:
             calibrate = 0
@@ -82,20 +72,10 @@ while True:
 
     display.fill_rect(0, 32, 128, 32, 0)
 
-    if bump_sensors.left_is_pressed():
-        display.fill_rect(0, 64-int(bump[0]*scale), 8, int(bump[0]*scale), 1)
-    else:
-        display.rect(0, 64-int(bump[0]*scale), 8, int(bump[0]*scale), 1)
-
     display.fill_rect(36, 64-int(line[0]*scale), 8, int(line[0]*scale), 1)
     display.fill_rect(48, 64-int(line[1]*scale), 8, int(line[1]*scale), 1)
     display.fill_rect(60, 64-int(line[2]*scale), 8, int(line[2]*scale), 1)
     display.fill_rect(72, 64-int(line[3]*scale), 8, int(line[3]*scale), 1)
     display.fill_rect(84, 64-int(line[4]*scale), 8, int(line[4]*scale), 1)
-
-    if bump_sensors.right_is_pressed():
-        display.fill_rect(120, 64-int(bump[1]*scale), 8, int(bump[1]*scale), 1)
-    else:
-        display.rect(120, 64-int(bump[1]*scale), 8, int(bump[1]*scale), 1)
 
     display.show()
