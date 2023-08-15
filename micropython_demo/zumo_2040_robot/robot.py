@@ -4,7 +4,7 @@ from .buzzer import Buzzer
 from .display import Display
 from .encoders import Encoders
 from .imu import IMU
-from .ir_sensors import LineSensors
+from .ir_sensors import LineSensors, ProximitySensors
 from .motors import Motors
 from .rgb_leds import RGBLEDs
 from .yellow_led import YellowLED

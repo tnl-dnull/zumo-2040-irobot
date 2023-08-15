@@ -1,5 +1,5 @@
 from .buttons import Button
-from machine import Pin
+from machine import Pin, PWM
 from array import array
 import time
 import rp2
@@ -195,3 +195,127 @@ class LineSensors(_IRSensors):
             else:
                d[i] = (d[i] - cal_min[i])*1000 // (cal_max[i] - cal_min[i])
         return data
+
+
+DEFAULT_FREQ = const(56000)
+
+# According to the TSSP770 datasheet, the delay between the start of the IR
+# pulses and the start of the sensor output pulse could be anywhere between
+# 7/(56 kHz) and 13/(56 kHz).
+#
+# The default pulse on time of 14/(56 kHz) = 250 us guarantees we are not
+# missing output pulses by reading the sensor too soon.
+#
+# TODO: allow configuring?
+PULSE_ON_TIME_US = const(250)
+
+# According to the TSSP770 datasheet, the sensor output pulse duration
+# could be up to 4/(56 kHz) longer than the duration of the IR pulses,
+# and the sensor output pulse could start as late as 13/(56 kHz) after
+# the IR pulses start.  Therefore, it is possible for the sensor output
+# pulse to end up to 17/(56 kHz) after the ending of the IR pulses.
+#
+# So the default off time is 18/(56 kHz) = 321 us.
+#
+# TODO: allow configuring?
+PULSE_OFF_TIME_US = const(321)
+
+_ir_pulses = None
+
+class IRPulses:
+    def __init__(self):
+        self.right_pulses_pwm_pin = Pin(16, Pin.OUT, value=0)
+        self.left_pulses_pwm_pin = Pin(17, Pin.OUT, value=0)
+        self.right_pulses_pwm = PWM(self.right_pulses_pwm_pin, freq=DEFAULT_FREQ, duty_ns=0)
+        self.left_pulses_pwm = PWM(self.left_pulses_pwm_pin, freq=DEFAULT_FREQ, duty_ns=0)
+
+    def set_freq(self, freq):
+        self.right_pulses_pwm.freq(freq)
+        # TODO: limit or reset duty cycle (brightness) if out of range?
+
+    def set_brightnesses(self, left, right):
+        self.left_pulses_pwm.duty_ns(left)
+        self.right_pulses_pwm.duty_ns(right)
+
+    def set_left_brightness(self, brightness):
+        self.left_pulses_pwm.duty_ns(brightness)
+
+    def set_right_brightness(self, brightness):
+        self.right_pulses_pwm.duty_ns(brightness)
+
+    def off(self):
+        self.set_brightnesses(0, 0)
+
+BRIGHTNESSES = [313, 1000, 2063, 3500, 5375, 7563] # TODO: allow configuring?
+
+class ProximitySensors:
+    def __init__(self):
+        global _ir_pulses
+        if not _ir_pulses:
+            _ir_pulses = IRPulses()
+        self.ir_pulses = _ir_pulses
+
+        # TODO: allow remapping?
+        self.left = Pin(23, Pin.IN)
+        self.right = Pin(24, Pin.IN)
+        self.front = Pin(27, Pin.IN)
+        self.ir_down = Pin(26)
+
+        self.sensors = [self.left, self.front, self.right]
+        self.counts = [[0, 0], [0, 0], [0, 0]]
+
+    def _prepare_to_read(self):
+        # pull-ups on
+        self.left.init(Pin.IN, Pin.PULL_UP)
+        self.right.init(Pin.IN, Pin.PULL_UP)
+        self.front.init(Pin.IN, Pin.PULL_UP)
+
+        # line sensor emitters off
+        self.ir_down.init(Pin.OUT, value=0)
+        time.sleep_us(PULSE_OFF_TIME_US)
+
+    def read(self):
+        self._prepare_to_read()
+
+        self.counts = [[0, 0], [0, 0], [0, 0]]
+
+        for brightness in BRIGHTNESSES:
+            self.ir_pulses.set_brightnesses(brightness, 0)
+            time.sleep_us(PULSE_ON_TIME_US)
+            for i, sensor in enumerate(self.sensors):
+                if not sensor.value(): self.counts[i][0] += 1
+
+            self.ir_pulses.off()
+            time.sleep_us(PULSE_OFF_TIME_US)
+
+            self.ir_pulses.set_brightnesses(0, brightness)
+            time.sleep_us(PULSE_ON_TIME_US)
+            for i, sensor in enumerate(self.sensors):
+                if not sensor.value(): self.counts[i][1] += 1
+
+            self.ir_pulses.off()
+            time.sleep_us(PULSE_OFF_TIME_US)
+
+    def counts_with_left_leds(self, sensor_number):
+        return self.counts[sensor_number][0]
+
+    def counts_with_right_leds(self, sensor_number):
+        return self.counts[sensor_number][1]
+
+    def left_counts_with_left_leds(self):
+        return self.counts_with_left_leds(0)
+
+    def left_counts_with_right_leds(self):
+        return self.counts_with_right_leds(0)
+
+    def front_counts_with_left_leds(self):
+        return self.counts_with_left_leds(1)
+
+    def front_counts_with_right_leds(self):
+        return self.counts_with_right_leds(1)
+
+    def right_counts_with_left_leds(self):
+        return self.counts_with_left_leds(2)
+
+    def right_counts_with_right_leds(self):
+        return self.counts_with_right_leds(2)
