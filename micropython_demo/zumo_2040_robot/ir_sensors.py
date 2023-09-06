@@ -197,40 +197,24 @@ class LineSensors(_IRSensors):
         return data
 
 
-DEFAULT_FREQ = const(56000)
-
-# According to the TSSP770 datasheet, the delay between the start of the IR
-# pulses and the start of the sensor output pulse could be anywhere between
-# 7/(56 kHz) and 13/(56 kHz).
-#
-# The default pulse on time of 14/(56 kHz) = 250 us guarantees we are not
-# missing output pulses by reading the sensor too soon.
-#
-# TODO: allow configuring?
-PULSE_ON_TIME_US = const(250)
-
-# According to the TSSP770 datasheet, the sensor output pulse duration
-# could be up to 4/(56 kHz) longer than the duration of the IR pulses,
-# and the sensor output pulse could start as late as 13/(56 kHz) after
-# the IR pulses start.  Therefore, it is possible for the sensor output
-# pulse to end up to 17/(56 kHz) after the ending of the IR pulses.
-#
-# So the default off time is 18/(56 kHz) = 321 us.
-#
-# TODO: allow configuring?
-PULSE_OFF_TIME_US = const(321)
+DEFAULT_FREQUENCY = const(56000)
 
 _ir_pulses = None
 
 class IRPulses:
     def __init__(self):
-        self.right_pulses_pwm_pin = Pin(16, Pin.OUT, value=0)
         self.left_pulses_pwm_pin = Pin(17, Pin.OUT, value=0)
-        self.right_pulses_pwm = PWM(self.right_pulses_pwm_pin, freq=DEFAULT_FREQ, duty_ns=0)
-        self.left_pulses_pwm = PWM(self.left_pulses_pwm_pin, freq=DEFAULT_FREQ, duty_ns=0)
+        self.right_pulses_pwm_pin = Pin(16, Pin.OUT, value=0)
+        self.left_pulses_pwm = PWM(self.left_pulses_pwm_pin, freq=DEFAULT_FREQUENCY, duty_ns=0)
+        self.right_pulses_pwm = PWM(self.right_pulses_pwm_pin, freq=DEFAULT_FREQUENCY, duty_ns=0)
 
-    def set_freq(self, freq):
+    def set_frequency(self, freq):
+        # Normally, only one of the below calls should be necessary since the
+        # default pins are on the same PWM slice (16 and 17 = 0A and 0B), but
+        # we'll go ahead and do both in case different pins are in use.
+        self.left_pulses_pwm.freq(freq)
         self.right_pulses_pwm.freq(freq)
+
         # TODO: limit or reset duty cycle (brightness) if out of range?
 
     def set_brightnesses(self, left, right):
@@ -255,6 +239,8 @@ class ProximitySensors:
             _ir_pulses = IRPulses()
         self.ir_pulses = _ir_pulses
 
+        self.set_frequency(DEFAULT_FREQUENCY)
+
         # TODO: allow remapping?
         self.left = Pin(23, Pin.IN)
         self.right = Pin(24, Pin.IN)
@@ -262,7 +248,28 @@ class ProximitySensors:
         self.ir_down = Pin(26)
 
         self.sensors = [self.left, self.front, self.right]
-        self.counts = [[0, 0], [0, 0], [0, 0]]
+        self.counts = [array('B', [0, 0]) for _ in range(len(self.sensors))]
+
+    def set_frequency(self, freq):
+        self.ir_pulses.set_frequency(freq)
+
+        # According to the TSSP770 datasheet, the delay between the start of the
+        # IR pulses and the start of the sensor output pulse could be anywhere
+        # between 7/frequency and 13/frfrequencyeq.
+        #
+        # The default pulse on time of 14/frequency (250 us for 56 kHz) guarantees we
+        # are not missing output pulses by reading the sensor too soon.
+        self.pulse_on_time_us = 14 * 1000000 // freq
+
+        # According to the TSSP770 datasheet, the sensor output pulse duration
+        # could be up to 4/freq longer than the duration of the IR pulses,
+        # and the sensor output pulse could start as late as 13/freq after
+        # the IR pulses start.  Therefore, it is possible for the sensor output
+        # pulse to end up to 17/freq after the ending of the IR pulses.
+        #
+        # So the default off time is 18/freq (321 us for 56 kHz).
+        self.pulse_off_time_us = 18 * 1000000 // freq
+
 
     def _prepare_to_read(self):
         # pull-ups on
@@ -272,29 +279,29 @@ class ProximitySensors:
 
         # line sensor emitters off
         self.ir_down.init(Pin.OUT, value=0)
-        time.sleep_us(PULSE_OFF_TIME_US)
+        time.sleep_us(self.pulse_off_time_us)
 
     def read(self):
         self._prepare_to_read()
 
-        self.counts = [[0, 0], [0, 0], [0, 0]]
+        self.counts = [array('B', [0, 0]) for _ in range(len(self.sensors))]
 
         for brightness in BRIGHTNESSES:
             self.ir_pulses.set_brightnesses(brightness, 0)
-            time.sleep_us(PULSE_ON_TIME_US)
-            for i, sensor in enumerate(self.sensors):
-                if not sensor.value(): self.counts[i][0] += 1
+            time.sleep_us(self.pulse_on_time_us)
+            for sensor, counts in zip(self.sensors, self.counts):
+                if not sensor.value(): counts[0] += 1
 
             self.ir_pulses.off()
-            time.sleep_us(PULSE_OFF_TIME_US)
+            time.sleep_us(self.pulse_off_time_us)
 
             self.ir_pulses.set_brightnesses(0, brightness)
-            time.sleep_us(PULSE_ON_TIME_US)
-            for i, sensor in enumerate(self.sensors):
-                if not sensor.value(): self.counts[i][1] += 1
+            time.sleep_us(self.pulse_on_time_us)
+            for sensor, counts in zip(self.sensors, self.counts):
+                if not sensor.value(): counts[1] += 1
 
             self.ir_pulses.off()
-            time.sleep_us(PULSE_OFF_TIME_US)
+            time.sleep_us(self.pulse_off_time_us)
 
     def counts_with_left_leds(self, sensor_number):
         return self.counts[sensor_number][0]
