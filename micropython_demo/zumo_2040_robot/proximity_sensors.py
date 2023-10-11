@@ -59,17 +59,17 @@ class ProximitySensors:
 
         # According to the TSSP770 datasheet, the delay between the start of the
         # IR pulses and the start of the sensor output pulse could be anywhere
-        # between 7/frequency and 13/frfrequencyeq.
+        # between 7/freq and 13/freq.
         #
-        # The default pulse on time of 14/frequency (250 us for 56 kHz) guarantees we
+        # The default pulse on time of 14/freq (250 us for 56 kHz) guarantees we
         # are not missing output pulses by reading the sensor too soon.
         self.pulse_on_time_us = 14 * 1000000 // freq
 
         # According to the TSSP770 datasheet, the sensor output pulse duration
-        # could be up to 4/freq longer than the duration of the IR pulses,
-        # and the sensor output pulse could start as late as 13/freq after
-        # the IR pulses start.  Therefore, it is possible for the sensor output
-        # pulse to end up to 17/freq after the ending of the IR pulses.
+        # could be up to 4/freq longer than the duration of the IR pulses, and
+        # the sensor output pulse could start as late as 13/freq after the IR
+        # pulses start.  Therefore, it is possible for the sensor output pulse
+        # to end up to 17/freq after the ending of the IR pulses.
         #
         # So the default off time is 18/freq (321 us for 56 kHz).
         self.pulse_off_time_us = 18 * 1000000 // freq
