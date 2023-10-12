@@ -9,10 +9,10 @@ _ir_pulses = None
 
 class IRPulses:
     def __init__(self):
-        self.left_pulses_pwm_pin = Pin(17, Pin.OUT, value=0)
-        self.right_pulses_pwm_pin = Pin(16, Pin.OUT, value=0)
-        self.left_pulses_pwm = PWM(self.left_pulses_pwm_pin, freq=DEFAULT_FREQ, duty_ns=0)
-        self.right_pulses_pwm = PWM(self.right_pulses_pwm_pin, freq=DEFAULT_FREQ, duty_ns=0)
+        self.left_pulses_pin = Pin(17, Pin.OUT, value=0)
+        self.right_pulses_pin = Pin(16, Pin.OUT, value=0)
+        self.left_pulses_pwm = PWM(self.left_pulses_pin, freq=DEFAULT_FREQ, duty_ns=0)
+        self.right_pulses_pwm = PWM(self.right_pulses_pin, freq=DEFAULT_FREQ, duty_ns=0)
 
     def set_frequency(self, freq):
         # Normally, only one of the below calls should be necessary since the
@@ -47,11 +47,11 @@ class ProximitySensors:
         self.set_frequency(DEFAULT_FREQ)
         self.brightness_levels = DEFAULT_BRIGHTNESS_LEVELS
 
-        self.left = Pin(23, Pin.IN)
-        self.right = Pin(24, Pin.IN)
-        self.front = Pin(27, Pin.IN)
+        self.left_sensor = Pin(23, Pin.IN)
+        self.right_sensor = Pin(24, Pin.IN)
+        self.front_sensor = Pin(27, Pin.IN)
 
-        self.sensors = [self.left, self.front, self.right]
+        self.sensors = [self.left_sensor, self.front_sensor, self.right_sensor]
         self.counts = [array('B', [0, 0]) for _ in range(len(self.sensors))]
 
     def set_frequency(self, freq):
@@ -76,9 +76,9 @@ class ProximitySensors:
 
     def _prepare_to_read(self):
         # pull-ups on
-        self.left.init(Pin.IN, Pin.PULL_UP)
-        self.right.init(Pin.IN, Pin.PULL_UP)
-        self.front.init(Pin.IN, Pin.PULL_UP)
+        self.left_sensor.init(Pin.IN, Pin.PULL_UP)
+        self.right_sensor.init(Pin.IN, Pin.PULL_UP)
+        self.front_sensor.init(Pin.IN, Pin.PULL_UP)
 
     def read(self):
         self._prepare_to_read()
