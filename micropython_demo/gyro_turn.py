@@ -1,15 +1,10 @@
 # This example make the robot turn 90 degrees using the gyroscope.
 #
-# In the "Choose edition" menu, use the A and C buttons to select what type of
-# Zumo robot you have and then press B to confirm.  Then press button A or C
-# to make the robot turn.
-#
 # If you need the turn to be more accurate, you might consider calibrating the
 # gyro (see rotation_resist.py), but that doesn't make much difference for
 # short turns.
 
 from zumo_2040_robot import robot
-from zumo_2040_robot.extras import editions
 import time
 
 angle_to_turn = 90
@@ -28,21 +23,9 @@ imu = robot.IMU()
 imu.reset()
 imu.enable_default()
 
-edition = editions.select()
-if edition == "Standard":
-    max_speed = 3000
-    kp = 140
-    kd = 4
-elif edition == "Turtle":
-    max_speed = 6000
-    kp = 350
-    kd = 7
-elif edition == "Hyper":
-    motors.flip_left(True)
-    motors.flip_right(True)
-    max_speed = 1500
-    kp = 140
-    kd = 4
+max_speed = 6000
+kp = 350
+kd = 7
 
 drive_motors = False
 last_time_gyro_reading = None
@@ -60,7 +43,6 @@ def draw_text():
         display.text(f"A: Turn {angle_to_turn} deg", 0, 0, 1)
         display.text(f"C: Turn {-angle_to_turn} deg", 0, 8, 1)
     display.text(f"Angle:", 0, 32, 1)
-    display.text(edition, 0, 56, 1)
 
 def handle_turn_or_stop(button, angle):
     global target_angle, drive_motors

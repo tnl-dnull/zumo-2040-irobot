@@ -1,9 +1,6 @@
 # This demo shows how the Zumo can use its gyroscope to detect when it is being
 # rotated, and use the motors to resist that rotation.
 #
-# In the "Choose edition" menu, use the A and C buttons to select what type of
-# Zumo robot you have and then press B to confirm.
-#
 # Do not move the robot while it says "Calibrating..." on the screen.
 #
 # After the calibration is done, press button A to start the motors.
@@ -15,7 +12,6 @@
 # This example is similar to gyro_turn.py.
 
 from zumo_2040_robot import robot
-from zumo_2040_robot.extras import editions
 import time
 
 motors = robot.Motors()
@@ -31,21 +27,9 @@ imu = robot.IMU()
 imu.reset()
 imu.enable_default()
 
-edition = editions.select()
-if edition == "Standard":
-    max_speed = 3000
-    kp = 140
-    kd = 4
-elif edition == "Turtle":
-    max_speed = 6000
-    kp = 350
-    kd = 7
-elif edition == "Hyper":
-    motors.flip_left(True)
-    motors.flip_right(True)
-    max_speed = 1500
-    kp = 140
-    kd = 4
+max_speed = 6000
+kp = 350
+kd = 7
 
 display.fill(0)
 display.text("Calibrating...", 0, 0, 1)
@@ -73,7 +57,6 @@ def draw_text():
     else:
         display.text("A: Start motors", 0, 0, 1)
     display.text(f"Angle:", 0, 32, 1)
-    display.text(edition, 0, 56, 1)
 
 draw_text()
 

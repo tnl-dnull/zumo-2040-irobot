@@ -5,7 +5,6 @@
 # It also uses the encoders to avoid rolling down the surface.
 
 from zumo_2040_robot import robot
-from zumo_2040_robot.extras import editions
 import time
 
 motors = robot.Motors()
@@ -22,16 +21,7 @@ imu = robot.IMU()
 imu.reset()
 imu.enable_default()
 
-edition = editions.select()
-if edition == "Standard":
-    standard_turn_speed = 1000
-elif edition == "Turtle":
-    standard_turn_speed = 2000
-elif edition == "Hyper":
-    standard_turn_speed = 750
-    motors.flip_left(True)
-    motors.flip_right(True)
-    encoders.flip(True)
+standard_turn_speed = 2000
 max_speed = standard_turn_speed * 1.5
 ke = 15
 
@@ -53,7 +43,6 @@ def draw_text():
     display.text(f"ax:", 0, 24, 1)
     display.text(f"ay:", 0, 32, 1)
     display.text(f"enc:", 0, 40, 1)
-    display.text(edition, 0, 56, 1)
 
 draw_text()
 display.show()

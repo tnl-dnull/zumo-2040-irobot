@@ -10,7 +10,6 @@
 # speed of the main loop.
 
 from zumo_2040_robot import robot
-from zumo_2040_robot.extras import editions
 import time
 import _thread
 
@@ -22,21 +21,9 @@ line_sensors = robot.LineSensors()
 # multi-core program.
 button_a = robot.ButtonA()
 
-edition = editions.select()
-if edition == "Standard":
-    max_speed = 6000
-    calibration_speed = 1000
-    calibration_count = 100
-elif edition == "Turtle":
-    max_speed = 6000
-    calibration_speed = 3000
-    calibration_count = 100
-elif edition == "Hyper":
-    max_speed = 2000
-    calibration_speed = 1000
-    calibration_count = 100
-    motors.flip_left(True)
-    motors.flip_right(True)
+max_speed = 6000
+calibration_speed = 3000
+calibration_count = 100
 
 display.fill(0)
 display.text("Line Follower", 0, 0)
@@ -75,7 +62,7 @@ motors.off()
 t1 = 0
 t2 = time.ticks_us()
 p = 0
-line = []
+line = [0,0,0,0,0]
 starting = False
 run_motors = False
 last_update_ms = 0
@@ -129,7 +116,7 @@ def follow_line():
         p = l - 2000
         d = p - last_p
         last_p = p
-        pid = p*90 + d*2000
+        pid = p*40 + d*1000
 
         min_speed = 0
         left = max(min_speed, min(max_speed, max_speed + pid))
@@ -140,9 +127,13 @@ def follow_line():
         else:
             motors.off()
 
+# Sleep immediately after starting a thread to work around this bug:
+# https://github.com/micropython/micropython/issues/10621
 _thread.start_new_thread(follow_line, ())
+time.sleep_ms(1)
 
 while True:
+    x = max_speed
     t = time.ticks_ms()
 
     if time.ticks_diff(t, last_update_ms) > 100:
