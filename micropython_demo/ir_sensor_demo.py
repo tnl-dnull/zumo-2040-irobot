@@ -14,15 +14,17 @@ line_sensors = robot.LineSensors()
 display = robot.Display()
 last_update = 0
 button_a = robot.ButtonA()
+button_b = robot.ButtonB()
 button_c = robot.ButtonC()
 
 calibrate = 0
 use_calibrated_read = False
+ir_emitters_on = True
 
 while True:
     # Start a background read; we'll time how long the
     # non-blocking part takes later.
-    line_sensors.start_read()
+    line_sensors.start_read(emitters_on = ir_emitters_on)
 
     # In a real program you could do slow things while
     # waiting for the sensors.
@@ -51,7 +53,11 @@ while True:
             display.text("Uncalib.   {}us".format(stop-start), 0, 0)
         if calibrate == 0:
             display.text('A: calibrate', 0, 10)
-            display.text('C: switch mode', 0, 20)
+            if ir_emitters_on:
+                display.text('B: down IR (on)', 0, 20)
+            else:
+                display.text('B: down IR (off)', 0, 20)
+            display.text('C: switch mode', 0, 30)
         elif calibrate == 1:
             display.text('cal line sens...', 0, 10)
             display.text('A: stop', 0, 20)
@@ -63,6 +69,10 @@ while True:
         else:
             calibrate = 0
 
+    if button_b.check():
+        last_update = 0
+        ir_emitters_on = not ir_emitters_on
+
     if button_c.check():
         last_update = 0
         use_calibrated_read = not use_calibrated_read
@@ -70,7 +80,7 @@ while True:
     # 64-40 = 24
     scale = 24/1023
 
-    display.fill_rect(0, 32, 128, 32, 0)
+    display.fill_rect(0, 40, 128, 24, 0)
 
     display.fill_rect(36, 64-int(line[0]*scale), 8, int(line[0]*scale), 1)
     display.fill_rect(48, 64-int(line[1]*scale), 8, int(line[1]*scale), 1)
