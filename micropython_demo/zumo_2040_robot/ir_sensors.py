@@ -162,9 +162,9 @@ class LineSensors(_IRSensors):
             self.cal_max[i] = max(tmp_min[i], self.cal_max[i])
             self.cal_min[i] = min(tmp_max[i], self.cal_min[i])
 
-    def start_read(self):
+    def start_read(self, emitters_on=True):
         global _state
-        self.ir_down.init(Pin.OUT, value=1)
+        if emitters_on: self.ir_down.init(Pin.OUT, value=1)
         _state = _READ_LINE
         self.qtr.run()
 
