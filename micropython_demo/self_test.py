@@ -3,7 +3,6 @@ from machine import Pin
 from zumo_2040_robot import robot
 import sys
 import time
-from math import pi
 
 battery = robot.Battery()
 button_a = robot.ButtonA()
@@ -290,70 +289,94 @@ def run_test():
     rgb_leds.set(1, YELLOW) # B
     rgb_leds.show()
     time.sleep_ms(750)
-
-    display_line_break(2)
-    display_centered_text('Motors')
     imu.enable_default()
     imu.acc.set_output_data_rate(1666)
     imu.acc.set_full_scale(4)
 
-    # calibrate accelerometer: find steady-state offset to subtract from
-    # subsequent readings, helping to account for inclined surfaces
-    OFFSET_SAMPLES = const(50)
-    acc_offset = 0
-    for _ in range(OFFSET_SAMPLES):
-        imu.read()
-        acc_offset += imu.acc.last_reading_g[0]
-    acc_offset /= OFFSET_SAMPLES
+    while True:
+        try:
+            display_line_break(2)
+            display_centered_text('Motors')
 
-    dist = 0 # in mm
-    speed = 0 # in m/s
-    encoders.get_counts(reset=True)
-    motors.set_speeds(1500, 1500)
-    start = time.ticks_us()
-    prev = start
+            # Calibrate accelerometer: find steady-state offset to subtract from
+            # subsequent readings, helping to account for inclined surfaces
+            OFFSET_SAMPLES = const(50)
+            acc_offset = 0
+            for _ in range(OFFSET_SAMPLES):
+                imu.read()
+                acc_offset += imu.acc.last_reading_g[0]
+            acc_offset /= OFFSET_SAMPLES
 
-    while dist < 50:
-        imu.read()
+            dist = 0 # in mm
+            speed = 0 # in m/s
+            left, right = 0, 0
+            encoders.get_counts(reset=True)
+            motors.set_speeds(2000, 2000)
+            start = time.ticks_us()
+            prev = start
 
-        now = time.ticks_us()
-        delta_t_us = time.ticks_diff(now, prev)
+            # Encoders are 12 counts/revolution of the motor shaft; wheels and
+            # tracks together have a diameter of 39 mm.
+            #
+            # Drive forward 441 encoder counts per side. This corresponds to:
+            # 90 mm on a 50:1 Zumo
+            # 60 mm on a 75:1 Zumo
+            # 45 mm on a 100:1 Zumo
+            #
+            # 45 mm / (pi*39 mm/rev) * 100 (gear ratio) * 12 CPR = 441 counts
+            while (left + right) < 882:
+                left, right = encoders.get_counts()
+                imu.read()
 
-        acc = (imu.acc.last_reading_g[0] - acc_offset) * 9.81 # in m/s^2
-        speed += acc * delta_t_us / 1e6 # in m/s
-        dist += speed * delta_t_us / 1e6 * 1000 # in mm
+                now = time.ticks_us()
+                delta_t_us = time.ticks_diff(now, prev)
 
-        prev = now
+                acc = (imu.acc.last_reading_g[0] - acc_offset) * 9.81 # in m/s^2
+                speed += acc * delta_t_us / 1e6 # in m/s
+                dist += speed * delta_t_us / 1e6 * 1000 # in mm
 
-        if time.ticks_diff(now, start) > 1500000: # 1.5 s
+                prev = now
+
+                if time.ticks_diff(now, start) > 2e6: # 2 seconds
+                    motors.set_speeds(0, 0)
+                    display_line_break()
+                    display_centered_text(f"L={left} R={right}")
+                    raise TestError(f"Timed out trying to drive forward: L={left} R={right}")
+
             motors.set_speeds(0, 0)
+
+            display_line_break(2)
+            display_centered_text(f"L={left} R={right}")
             display_line_break()
             display_centered_text(f"dist={dist:.1f}")
-            raise TestError(f"Timed out trying to drive forward 50 mm: dist={dist:.1f}")
+            display_line_break(2)
+            display_centered_text(f"{gear_ratio}:1:")
+            # Distance measured should be 80% to 105% of the expected value.
+            # Encoder counts should be within 15% of the expected value of 441.
+            if gear_ratio == 50 and dist > 72 and dist < 94.5 and \
+                    left > 374 and left < 508 and right > 374 and right < 508:
+                break
+            elif gear_ratio == 75 and dist > 48 and dist < 63 and \
+                    left > 374 and left < 508 and right > 374 and right < 508:
+                break
+            elif gear_ratio == 100 and dist > 36 and dist < 47.25 and \
+                    left > 374 and left < 508 and right > 374 and right < 508:
+                break
+            else:
+                raise TestError(f"Edition mismatch: expected {gear_ratio}:1, measured L={left} R={right} dist={dist:.1f}")
 
-    motors.set_speeds(0, 0)
-    left, right = encoders.get_counts()
+        except TestError as te:
+            show_test_error(te)
+            display_line_break()
 
-    # 12 CPR encoders; 39 mm wheel + track diameter
-    # average left and right encoder counts
-    # counts / 12CPR / ratio * pi * 39mm = dist
-    # ratio = counts / 12CPR * pi * 39mm / dist
-    calc_ratio = (left + right) / 2 / 12 * pi * 39 / dist
+            display_centered_text('Any btn to retry')
+            while True:
+                if button_a.check() or button_b.check() or button_c.check():
+                    break
 
-    display_line_break(2)
-    display_centered_text(f"L={left} R={right}")
-    display_line_break()
-    display_centered_text(f"calc ratio={calc_ratio:.1f}")
-    display_line_break(2)
-    display_centered_text(f"{gear_ratio}:1:")
-    if gear_ratio == 50 and calc_ratio > 37.5 and calc_ratio < 62.5:
-        pass
-    elif gear_ratio == 75 and calc_ratio > 62.5 and calc_ratio < 87.5:
-        pass
-    elif gear_ratio == 100 and calc_ratio > 87.5 and calc_ratio < 112.5:
-        pass
-    else:
-        raise TestError(f"Edition mismatch: expected {gear_ratio}:1, measured L={left} R={right} calc ratio={calc_ratio:.1f}")
+            rgb_leds.off()
+            buzzer.play_in_background('<g32')
+            time.sleep_ms(1000)
 
     display_line_break()
     display_centered_text('PASS')
