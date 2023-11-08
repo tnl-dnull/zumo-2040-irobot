@@ -309,12 +309,12 @@ def run_test():
                 acc_offset += imu.acc.last_reading_g[0]
             acc_offset /= OFFSET_SAMPLES
 
-            dist = 0 # in mm
-            speed = 0 # in m/s
+            dist = 0
+            speed = 0
             left, right = 0, 0
 
-            # Force garbage collection before starting to try to get more
-            # consistent timing while reading the accelerometer.
+            # Force garbage collection before starting to avoid needing to do it
+            # while reading the accelerometer.
             gc.collect()
 
             encoders.get_counts(reset=True)
@@ -325,29 +325,35 @@ def run_test():
             # Encoders are 12 counts/revolution of the motor shaft; sprockets
             # have 12 teeth and tracks have 48 mm or 5 teeth between axles.
             #
-            # Drive forward 469 encoder counts per side. This corresponds to:
-            # 90 mm on a 50:1 Zumo
-            # 60 mm on a 75:1 Zumo
-            # 45 mm on a 100:1 Zumo
+            # Drive forward 438 encoder counts per side. This corresponds to:
+            # 84 mm on a 50:1 Zumo
+            # 56 mm on a 75:1 Zumo
+            # 42 mm on a 100:1 Zumo
             #
-            # 45 mm / (12 teeth/rev * 48 mm / 5 teeth)
-            #   * 100 (gear ratio) * 12 CPR = 469 counts
-            while (left + right) < 938:
+            # 42 mm / (12 teeth/rev * 48 mm / 5 teeth)
+            #   * 100 (gear ratio) * 12 CPR = 438 counts
+            while (left + right) < 876:
                 left, right = encoders.get_counts()
                 imu.acc.read()
 
                 now = time.ticks_us()
                 delta_t_us = time.ticks_diff(now, prev)
-                acc_reading = imu.acc.last_reading_g[0]
-                if abs(acc_reading) > 3.9:
+                if delta_t_us > 2000:
                     motors.set_speeds(0, 0)
                     display_line_break()
-                    display_centered_text(f"Acc sat: {acc_reading:.2f}")
-                    raise TestError(f"Acc saturated: {acc_reading:.2f}")
+                    display_centered_text(f"dt big: {delta_t_us}")
+                    raise TestError(f"Delta t too big: {delta_t_us} i={i} L={left} R={right}")
 
-                acc = (acc_reading - acc_offset) * 9.81 # in m/s^2
-                speed += acc * delta_t_us / 1e6 # in m/s
-                dist += speed * delta_t_us / 1e6 * 1000 # in mm
+                acc = imu.acc.last_reading_g[0]
+                if abs(acc) > 3.9:
+                    motors.set_speeds(0, 0)
+                    display_line_break()
+                    display_centered_text(f"Acc sat: {acc:.2f}")
+                    raise TestError(f"Acc saturated: {acc:.2f}")
+
+                acc -= acc_offset # in g
+                speed += acc * delta_t_us # in g*us
+                dist += speed * delta_t_us # in g*us^2
 
                 prev = now
 
@@ -359,27 +365,33 @@ def run_test():
 
             motors.set_speeds(0, 0)
 
+            dist /= (1e9 / 9.81) # convert from g*us^2 to mm (1 g = 9.81 m/s^2)
+
             display_line_break(2)
             display_centered_text(f"L={left} R={right}")
             display_line_break()
             display_centered_text(f"dist={dist:.1f}")
             display_line_break(2)
             display_centered_text(f"{gear_ratio}:1:")
+
             # Distance measured should be within 14.3% (1/7) of the expected
             # value (this is the most tolerant we can be without allowing the
             # ranges to overlap). Encoder counts should be within 15% of the
-            # expected 469.
-            if gear_ratio == 50 and dist > 77.1 and dist < 102.9 and \
-                    left > 398 and left < 540 and right > 398 and right < 540:
+            # expected 438.
+            COUNTS_MIN = const(372)
+            COUNTS_MAX = const(504)
+
+            if gear_ratio == 50 and dist > 72 and dist < 96 and \
+                    left > COUNTS_MIN and left < COUNTS_MAX and right > COUNTS_MIN and right < COUNTS_MAX:
                 break
-            elif gear_ratio == 75 and dist > 51.4 and dist < 68.6 and \
-                    left > 398 and left < 540 and right > 398 and right < 540:
+            elif gear_ratio == 75 and dist > 48 and dist < 64 and \
+                    left > COUNTS_MIN and left < COUNTS_MAX and right > COUNTS_MIN and right < COUNTS_MAX:
                 break
-            elif gear_ratio == 100 and dist > 38.6 and dist < 51.4 and \
-                    left > 398 and left < 540 and right > 398 and right < 540:
+            elif gear_ratio == 100 and dist > 36 and dist < 48 and \
+                    left > COUNTS_MIN and left < COUNTS_MAX and right > COUNTS_MIN and right < COUNTS_MAX:
                 break
             else:
-                raise TestError(f"Edition mismatch: expected {gear_ratio}:1, measured L={left} R={right} dist={dist:.1f}")
+                raise TestError(f"Gear ratio mismatch: expected {gear_ratio}:1, measured L={left} R={right} dist={dist:.1f}")
 
         except TestError as te:
             show_test_error(te)
