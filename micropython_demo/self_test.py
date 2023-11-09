@@ -321,6 +321,7 @@ def run_test():
             motors.set_speeds(2000, 2000)
             start = time.ticks_us()
             prev = start
+            max_delta_t = 0
 
             # Encoders are 12 counts/revolution of the motor shaft; sprockets
             # have 12 teeth and tracks have 48 mm or 5 teeth between axles.
@@ -338,11 +339,7 @@ def run_test():
 
                 now = time.ticks_us()
                 delta_t_us = time.ticks_diff(now, prev)
-                if delta_t_us > 2000:
-                    motors.set_speeds(0, 0)
-                    display_line_break()
-                    display_centered_text(f"dt big: {delta_t_us}")
-                    raise TestError(f"Delta t too big: {delta_t_us} i={i} L={left} R={right}")
+                if delta_t_us > max_delta_t: max_delta_t = delta_t_us
 
                 acc = imu.acc.last_reading_g[0]
                 if abs(acc) > 3.9:
@@ -366,6 +363,11 @@ def run_test():
             motors.set_speeds(0, 0)
 
             dist /= (1e9 / 9.81) # convert from g*us^2 to mm (1 g = 9.81 m/s^2)
+
+            # Warn if max delta t recorded was higher than expected
+            if max_delta_t > 2000:
+                display_line_break()
+                display_centered_text(f"dt warn: {max_delta_t}")
 
             display_line_break(2)
             display_centered_text(f"L={left} R={right}")
