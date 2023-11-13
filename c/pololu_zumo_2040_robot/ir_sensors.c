@@ -10,7 +10,6 @@
 #define IR_PIO pio1
 #define IR_FUNC GPIO_FUNC_PIO1
 
-#define IR_EMITTER_BUMP 23
 #define IR_EMITTER_LINE 26
 
 #define TIMEOUT 1024
@@ -20,13 +19,7 @@ static uint8_t counter_offset;
 
 #define STATE_DONE 0
 #define STATE_READ_LINE 1
-#define STATE_READ_BUMP 2
 uint8_t state;
-
-uint16_t bump_sensors[2];
-uint16_t bump_sensors_threshold_min[2] = { 1025, 1025 };
-uint16_t bump_sensors_threshold_max[2] = { 1025, 1025 };
-bool bump_sensors_pressed[2];
 
 uint16_t line_sensors[5];
 uint16_t line_sensors_cal_min[5] = { 1025, 1025, 1025, 1025, 1025 };
@@ -153,8 +146,6 @@ void line_sensors_calibrate()
 
 void line_sensors_start_read()
 {
-  gpio_init(IR_EMITTER_BUMP);
-
   gpio_init(IR_EMITTER_LINE);
   gpio_put(IR_EMITTER_LINE, 1);
   gpio_set_dir(IR_EMITTER_LINE, GPIO_OUT);
@@ -171,7 +162,6 @@ void line_sensors_read()
   ir_sensors_read(output);
 
   gpio_init(IR_EMITTER_LINE);
-  gpio_init(IR_EMITTER_BUMP);
   state = STATE_DONE;
 
   for (uint8_t i = 0; i < 5; i++) { line_sensors[4 - i] = output[i + 2]; }
@@ -198,73 +188,4 @@ void line_sensors_read_calibrated()
         * 1000 / (line_sensors_cal_max[i] - line_sensors_cal_min[i]);
     }
   }
-}
-
-void bump_sensors_reset_calibration()
-{
-  bump_sensors_threshold_min[0] = 1025;
-  bump_sensors_threshold_max[0] = 1025;
-  bump_sensors_threshold_min[1] = 1025;
-  bump_sensors_threshold_max[1] = 1025;
-}
-
-void bump_sensors_calibrate()
-{
-  const unsigned int count = 50;
-  uint32_t sum[2] = { 0, 0 };
-  for (unsigned int trial = 0; trial < count; trial++)
-  {
-    bump_sensors_read();
-    sum[0] += bump_sensors[0];
-    sum[1] += bump_sensors[1];
-  }
-
-  // Set the thresholds to 140% and 160% of the average reading.
-  for (uint8_t i = 0; i < 2; i++)
-  {
-    bump_sensors_threshold_min[i] = (sum[i] * 140) / (count * 100);
-    bump_sensors_threshold_max[i] = (sum[i] * 160) / (count * 100);
-  }
-}
-
-void bump_sensors_start_read()
-{
-  gpio_init(IR_EMITTER_LINE);
-
-  gpio_init(IR_EMITTER_BUMP);
-  gpio_put(IR_EMITTER_BUMP, 1);
-  gpio_set_dir(IR_EMITTER_BUMP, GPIO_OUT);
-
-  state = STATE_READ_BUMP;
-  ir_sensors_start_read();
-}
-
-void bump_sensors_read()
-{
-  if (state != STATE_READ_BUMP) { bump_sensors_start_read(); }
-
-  uint16_t output[7];
-  ir_sensors_read(output);
-
-  gpio_init(IR_EMITTER_LINE);
-  gpio_init(IR_EMITTER_BUMP);
-  state = STATE_DONE;
-
-  for (uint8_t i = 0; i < 2; i ++)
-  {
-    bump_sensors[i] = output[1 - i];
-    uint16_t threshold = bump_sensors_pressed[i] ?
-      bump_sensors_threshold_min[i] : bump_sensors_threshold_max[i];
-    bump_sensors_pressed[i] = bump_sensors[i] > threshold;
-  }
-}
-
-bool bump_sensor_left_is_pressed(void)
-{
-  return bump_sensors_pressed[0];
-}
-
-bool bump_sensor_right_is_pressed(void)
-{
-  return bump_sensors_pressed[1];
 }

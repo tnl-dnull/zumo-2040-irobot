@@ -1,10 +1,9 @@
-# Demonstrates the IR sensors on the Zumo robot: the left and right
-# bump sensors on the front of the robot and the five downward-looking
-# reflectance/line sensors.
+# Demonstrates the five downward-looking infrared reflectace/line
+# sensors on the Zumo robot.
 #
-# Press A to calibrate both sets of sensors.
+# Press button A to calibrate the sensors.
 #
-# Press C to switch the line sensors to display calibrated or
+# Press button C to switch between displaying calibrated and
 # uncalibrated values.
 
 from zumo_2040_robot import robot

@@ -1,4 +1,4 @@
-// A simple example showing how to blink the yellow LED on the Pololu 3pi+
+// A simple example showing how to blink the yellow LED on the Pololu Zumo
 // 2040 Robot without using Pololu libraries.
 
 #include <pico/stdlib.h>

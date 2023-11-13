@@ -1,8 +1,8 @@
 # Doxygen configuration file for generating documentation.
-PROJECT_NAME = "Pololu 3pi+ 2040 Robot Libraries and Example Code for C"
+PROJECT_NAME = "Pololu Zumo 2040 Robot Libraries and Example Code for C"
 OUTPUT_DIRECTORY = docs
 INLINE_INHERITED_MEMB = YES
-INPUT = pololu_3pi_2040_robot README.md
+INPUT = pololu_zumo_2040_robot README.md
 USE_MDFILE_AS_MAINPAGE = README.md
 RECURSIVE = YES
 SOURCE_BROWSER = YES
