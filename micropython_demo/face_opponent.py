@@ -11,6 +11,7 @@ proximity_sensors = robot.ProximitySensors()
 button_a = robot.ButtonA()
 display = robot.Display()
 rgb_leds = robot.RGBLEDs()
+rgb_leds.set_brightness(2)
 
 # A sensors reading must be greater than or equal to this threshold in order for
 # the program to consider that sensor as seeing an object.
@@ -53,6 +54,11 @@ drive_motors = False
 # / 6 max proximity reading = 4 scale factor
 BAR_SCALE = const(4)
 
+RGB_OFF = (0, 0, 0)
+RGB_GREEN = (0, 255, 0)
+RGB_YELLOW = (255, 64, 0)
+RGB_RED = (255, 0, 0)
+
 def turn_right():
     global turning_left, turning_right
     motors.set_speeds(turn_speed, -turn_speed)
@@ -77,6 +83,12 @@ def draw_text():
         display.text("A: Stop motors", 0, 0, 1)
     else:
         display.text("A: Start motors", 0, 0, 1)
+
+def set_front_rgb_leds(front_left, front, front_right):
+    rgb_leds.set(5, front_left)
+    rgb_leds.set(4, front)
+    rgb_leds.set(3, front_right)
+    rgb_leds.show()
 
 draw_text()
 display.show()
@@ -126,32 +138,37 @@ while True:
     # TURN_SPEED_MAX.
     turn_speed = min(TURN_SPEED_MAX, max(TURN_SPEED_MIN, turn_speed))
 
-    # TODO LEDs
+    if object_seen:
+        if max(reading_left, reading_front_left) < max(reading_right, reading_front_right):
+            # The larger of the right values is greater, so the object is
+            # probably closer to the robot's right LEDs, which means the robot
+            # is not facing it directly.  Turn to the right to try to make it
+            # more even.
+            if drive_motors: turn_right()
+            sense_dir = DIR_RIGHT
+            set_front_rgb_leds(RGB_OFF, RGB_OFF, RGB_YELLOW)
 
-    if drive_motors:
-        if object_seen:
-            if max(reading_left, reading_front_left) < max(reading_right, reading_front_right):
-                # The larger of the right values is greater, so the object is
-                # probably closer to the robot's right LEDs, which means the robot
-                # is not facing it directly.  Turn to the right to try to make it
-                # more even.
-                turn_right()
-                sense_dir = DIR_RIGHT
+        elif max(reading_left, reading_front_left) > max(reading_right, reading_front_right):
+            # The larger of the left values is greater, so turn to the left.
+            if drive_motors: turn_left()
+            sense_dir = DIR_LEFT
+            set_front_rgb_leds(RGB_YELLOW, RGB_OFF, RGB_OFF)
 
-            elif max(reading_left, reading_front_left) > max(reading_right, reading_front_right):
-                # The larger of the left values is greater, so turn to the left.
-                turn_left()
-                sense_dir = DIR_LEFT
-
-            else:
-                # The values are equal, so stop the motors.
-                stop()
         else:
-            # No object is seen, so just keep turning in the direction that we last
-            # sensed the object.
-            if sense_dir == DIR_RIGHT:
-                turn_right()
-            else:
-                turn_left()
+            # The values are equal, so stop the motors.
+            stop()
+            set_front_rgb_leds(RGB_OFF, RGB_GREEN, RGB_OFF)
+
     else:
+        # No object is seen, so just keep turning in the direction that we last
+        # sensed the object.
+        if sense_dir == DIR_RIGHT:
+            if drive_motors: turn_right()
+            set_front_rgb_leds(RGB_OFF, RGB_OFF, RGB_RED)
+
+        else:
+            if drive_motors: turn_left()
+            set_front_rgb_leds(RGB_RED, RGB_OFF, RGB_OFF)
+
+    if not drive_motors:
         stop()
