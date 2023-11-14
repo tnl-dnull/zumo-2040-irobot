@@ -105,7 +105,10 @@ while True:
     if button_a.check() == True:
         while button_a.check() != False: pass  # wait for release
         drive_motors = not drive_motors
-        if drive_motors: time.sleep_ms(250)
+        if drive_motors:
+            time.sleep_ms(250)
+        else:
+            stop()
         draw_text()
 
     # Update the display.
@@ -169,6 +172,3 @@ while True:
         else:
             if drive_motors: turn_left()
             set_front_rgb_leds(RGB_RED, RGB_OFF, RGB_OFF)
-
-    if not drive_motors:
-        stop()
