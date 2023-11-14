@@ -112,5 +112,5 @@ def generate_c(font, filename):
 
         print("};", file=output)
 
-generate_c(read_hex('unscii-16.hex', 8, 16), 'c/pololu_3pi_2040_robot/font_8x16.c')
-generate_c(read_hex('unscii-8.hex', 8, 8), 'c/pololu_3pi_2040_robot/font_8x8.c')
+generate_c(read_hex('unscii-16.hex', 8, 16), 'c/pololu_zumo_2040_robot/font_8x16.c')
+generate_c(read_hex('unscii-8.hex', 8, 8), 'c/pololu_zumo_2040_robot/font_8x8.c')

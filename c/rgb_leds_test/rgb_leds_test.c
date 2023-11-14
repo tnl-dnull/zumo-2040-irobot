@@ -1,8 +1,8 @@
 // This example shows how to control the six RGB LEDs on the
-// Pololu 3pi+ 2040 Robot.
+// Pololu Zumo 2040 Robot.
 
 #include <pico/stdlib.h>
-#include <pololu_3pi_2040_robot.h>
+#include <pololu_zumo_2040_robot.h>
 
 rgb_color colors[6];
 

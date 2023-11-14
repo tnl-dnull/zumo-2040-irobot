@@ -1,17 +1,17 @@
-// This example shows how to control the motors on the Pololu 3pi+ 2040 Robot.
+// This example shows how to control the motors on the Pololu Zumo 2040 Robot.
 // It tests each motor by running it forward and then reverse with smooth
 // acceleration and deceleration.
 
 #include <stdio.h>
 #include <pico/stdlib.h>
-#include <pololu_3pi_2040_robot.h>
+#include <pololu_zumo_2040_robot.h>
 
 int main()
 {
   stdio_init_all();
   motors_init();
 
-  // If a motor on your 3pi+ is installed in a flipped orienation, you can
+  // If a motor on your robot is installed in a flipped orientation, you can
   // uncomment one or two lines below to have the library correct for it.
   //motors_flip_left(true);
   //motors_flip_right(true);

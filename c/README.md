@@ -1,13 +1,13 @@
-# Pololu 3pi+ 2040 Robot Libraries and Example Code for C
+# Pololu Zumo 2040 Robot Libraries and Example Code for C
 
 [www.pololu.com](https://www.pololu.com/)
 
 ## Summary
 
-This directory contains example code for the Pololu 3pi+ 2040 Robot written in
+This directory contains example code for the Pololu Zumo 2040 Robot written in
 C.  Most of the code depends on the [Pico SDK].
 
-The `pololu_3pi_2040_robot` directory contains a library of functions
+The `pololu_zumo_2040_robot` directory contains a library of functions
 that help access various components of the robot.
 The `include` directory holds the include files for the library.
 
@@ -48,8 +48,8 @@ Install [Homebrew], then do:
 Use Git to download this repository (if you don't already have it) and
 navigate to this directory:
 
-    git clone https://github.com/pololu/pololu-3pi-2040-robot
-    cd pololu-3pi-2040-robot/c
+    git clone https://github.com/pololu/pololu-zumo-2040-robot
+    cd pololu-zumo-2040-robot/c
 
 Use Git to download the Pico SDK and the tinyusb submodule.  (If you don't want
 to store the Pico SDK in this location, you can set the `PICO_SDK_PATH`
@@ -89,7 +89,7 @@ append `-DPython3_EXECUTABLE=$(which python3)` to the first CMake command.
 
 ## Flashing the compiled firmware
 
-Connect your 3pi+ 2040 Robot to your computer via USB and get it into BOOTSEL
+Connect your Zumo 2040 Robot to your computer via USB and get it into BOOTSEL
 mode by pressing and releasing the Reset button while holding down button B.
 In this mode, the RP2040 presents itself to the computer as a
 USB Mass Storage Device.  You can load the code you compiled onto the robot
@@ -111,7 +111,7 @@ robot will start executing the code.
 
 ## Notes
 
-You can move pico-sdk and the pololu_3pi_2040_robot library into
+You can move pico-sdk and the pololu_zumo_2040_robot library into
 different locations, for example making them subdirectories of your project.
 If you do that, update the paths starting with "../" in your CMakeLists.txt.
 

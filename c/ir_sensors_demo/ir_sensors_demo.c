@@ -1,10 +1,9 @@
-// Demonstrates the IR sensors on the 3pi+ robot: the left and right
-// bump sensors on the front of the robot and the five downward-looking
-// reflectance/line sensors.
+// Demonstrates the five downward-looking infrared reflectace/line
+// sensors on the Zumo robot.
 //
-// Press button A to calibrate both sets of sensors.
+// Press button A to calibrate the sensors.
 //
-// Press button C to switch the line sensors to display calibrated or
+// Press button C to switch between displaying calibrated and
 // uncalibrated values.
 //
 // On the USB virtual serial port, you can type "a" or "c" to perform the
@@ -15,7 +14,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <pico/stdlib.h>
-#include <pololu_3pi_2040_robot.h>
+#include <pololu_zumo_2040_robot.h>
 
 button button_a = BUTTON_INIT(button_a_is_pressed);
 button button_b = BUTTON_INIT(button_b_is_pressed);
@@ -109,7 +108,6 @@ int main()
 
   while (1)
   {
-    bump_sensors_read();
     line_sensors_read_calibrated();
 
     if (calibrate) { line_sensors_calibrate(); }
@@ -118,15 +116,6 @@ int main()
     if (cmd == 'a')
     {
       calibrate = !calibrate;
-      if (calibrate)
-      {
-        bump_sensors_calibrate();
-        display_fill(0);
-        display_text("calibrated bump", 0, 0, COLOR_WHITE_ON_BLACK);
-        display_text("sensors", 0, 8, COLOR_WHITE_ON_BLACK);
-        display_show();
-        sleep_ms(500);
-      }
       draw_options();
       draw_mode();
     }
@@ -138,71 +127,52 @@ int main()
     if (cmd == 'd')
     {
       // Dump everything to the virtual serial port.
-      printf("raw:        %4u %4u %4u %4u %4u %4u %4u\n",
-        bump_sensors[0],
+      printf("raw:        %4u %4u %4u %4u %4u\n",
         line_sensors[0],
         line_sensors[1],
         line_sensors[2],
         line_sensors[3],
-        line_sensors[4],
-        bump_sensors[1]);
-      printf("cal_min:    %4u %4u %4u %4u %4u %4u %4u\n",
-        bump_sensors_threshold_min[0],
+        line_sensors[4]);
+      printf("cal_min:    %4u %4u %4u %4u %4u\n",
         line_sensors_cal_min[0],
         line_sensors_cal_min[1],
         line_sensors_cal_min[2],
         line_sensors_cal_min[3],
-        line_sensors_cal_min[4],
-        bump_sensors_threshold_min[1]);
-      printf("cal_max:    %4u %4u %4u %4u %4u %4u %4u\n",
-        bump_sensors_threshold_max[0],
+        line_sensors_cal_min[4]);
+      printf("cal_max:    %4u %4u %4u %4u %4u\n",
         line_sensors_cal_max[0],
         line_sensors_cal_max[1],
         line_sensors_cal_max[2],
         line_sensors_cal_max[3],
-        line_sensors_cal_max[4],
-        bump_sensors_threshold_max[1]);
-      printf("calibrated: %4u %4u %4u %4u %4u %4u %4u\n\n",
-        bump_sensors_pressed[0],
+        line_sensors_cal_max[4]);
+      printf("calibrated: %4u %4u %4u %4u %4u\n\n",
         line_sensors_calibrated[0],
         line_sensors_calibrated[1],
         line_sensors_calibrated[2],
         line_sensors_calibrated[3],
-        line_sensors_calibrated[4],
-        bump_sensors_pressed[1]);
+        line_sensors_calibrated[4]);
     }
     if (cmd == 'r')
     {
       line_sensors_reset_calibration();
-      bump_sensors_reset_calibration();
     }
 
     // Redraw the bottom half of the display.
     display_fill_rect(0, 32, 128, 32, 0);
     if (use_calibrated_read)
     {
-      draw_bar(0, bump_sensors_pressed[0] * 1024, 1025, 1025);
       for (unsigned int i = 0; i < 5; i++)
       {
         draw_bar(24 + i * 16, line_sensors_calibrated[i], 1025, 1025);
       }
-      draw_bar(112, bump_sensors_pressed[1] * 1024, 1025, 1025);
     }
     else
     {
-      // Scale the bump sensor readings up so they are easier to see
-      const uint8_t bump_scale = 2;
-      draw_bar(0, bump_sensors[0] * bump_scale,
-        bump_sensors_threshold_min[0] * bump_scale,
-        bump_sensors_threshold_max[0] * bump_scale);
       for (unsigned int i = 0; i < 5; i++)
       {
         draw_bar(24 + i * 16, line_sensors[i],
           line_sensors_cal_min[i], line_sensors_cal_max[i]);
       }
-      draw_bar(112, bump_sensors[1] * bump_scale,
-        bump_sensors_threshold_min[1] * bump_scale,
-        bump_sensors_threshold_max[1] * bump_scale);
     }
 
     display_show();
