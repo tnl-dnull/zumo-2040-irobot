@@ -125,3 +125,16 @@ class ProximitySensors:
 
     def right_counts_with_right_leds(self):
         return self.counts_with_right_leds(2)
+
+    def total_counts(self):
+        return sum(self.counts[0]) + sum(self.counts[1]) + sum(self.counts[2])
+
+    def angle_estimate(self):
+        l = sum(self.counts[0])
+        fl = self.counts[1][0]
+        fr = self.counts[1][1]
+        r = sum(self.counts[2])
+        if l + fl + fr + r == 0:
+            return 0
+
+        return (-90 * l -20 * fl + 20 * fr + 90 * r) // (l + fl + fr + r)
