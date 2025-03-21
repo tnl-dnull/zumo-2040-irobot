@@ -2,37 +2,35 @@
 
 # ... call into the interface with byte array / command sequence, 
 #   interface will react and may return response?  
-
+import irobot_display
 
 def irobot_interface_process(command):
 
     # pull out the command byte...
-    if len(command) < 1:
-        return (False,)
+    # if len(command) < 1:
+    #     return (False,'')
     # command and data
     #if len(command) > 1:
         
     # command
-    cmd_byte = command[0]
-    match cmd_byte:
-        # start
-        case 128:
-            
-        # reset
-        case 7:
-            
-        # stop
-        case 173:
-
-        # full
-        case 132:
-            
-        # drive
-        case 137:
-
-        # drive direct
-        case 145:
-            
+    #cmd_byte = command[0]
+    if command == 128:
+        irobot_display.update_handler_display("cmd 128") 
+    # reset
+    elif command == 7:
+        irobot_display.update_handler_display("cmd 7")
+    # stop
+    elif command == 173:
+        irobot_display.update_handler_display("cmd 173")
+    # full
+    elif command == 132:
+        irobot_display.update_handler_display("cmd 132")
+    # drive
+    elif command == 137:
+        irobot_display.update_handler_display("cmd 137")
+    # drive direct
+    elif command == 145:
+        irobot_display.update_handler_display("cmd 145")
     # other commands TBD...
     #
     # drive pwm?
@@ -43,11 +41,7 @@ def irobot_interface_process(command):
     # sensors
     # query list
     # stream
-
-        case _:
-            return (False,)
-
-    return (True,"response")
+    #return (True,"response")
     # (False,)
 
 # define list of supported status responses...

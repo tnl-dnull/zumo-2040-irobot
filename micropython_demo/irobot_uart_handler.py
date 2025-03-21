@@ -9,8 +9,9 @@
 from zumo_2040_robot import robot
 from machine import UART, Pin
 import time
-import micropython_demo.irobot_display as irobot_display
+
 import irobot_interface
+import irobot_display
 
 # Interface uart is 115200 8n1 by default
 uart = UART(0, baudrate=115200, tx=Pin(28), rx=Pin(29))
@@ -43,43 +44,13 @@ while True:
 
         # quick command comparison
         if command is not None:
-            result = irobot_interface_process(command)
+            irobot_interface.irobot_interface_process(command)
 
             # command was incomplete or corrupt
-            if result[0] == False:
+            # if result[0] == False:
+            #     print('Command Fail')
+            # # command could be processed,  check if we need to respond    
+            # else:
+            #     print('Command Processed')
                 
-                print('Command Fail')
-            # command could be processed,  check if we need to respond    
-            else:
-                
-
-
         last_update_time = time.ticks_ms()
-
-        if button_a.is_pressed():
-            # debounce TODO: can these be combined into a button handler? (a,b,c)
-            if button_count_a < 4:
-                button_count_a += 1
-            else:
-                # do something on b-press
-        else:
-            button_count_a = 0
-
-        if button_c.is_pressed():
-            # debounce...
-            if button_count_c < 4:
-                button_count_c += 1
-            else:
-                # do something on b-press
-        else:
-            button_count_c = 0
-
-        if left_speed < 0: left_speed = 0
-        if left_speed > motors.MAX_SPEED: left_speed = motors.MAX_SPEED
-        if right_speed < 0: right_speed = 0
-        if right_speed > motors.MAX_SPEED: right_speed = motors.MAX_SPEED
-
-        motors.set_speeds(left_dir * left_speed, right_dir * right_speed)
-
-        irobot_display.update_handler_display()
-
