@@ -31,6 +31,8 @@ def irobot_interface_process(command):
     # drive direct
     elif command == 145:
         irobot_display.update_handler_display("cmd 145")
+    else :
+        irobot_display.update_handler_display("rx byte " + str(command))
     # other commands TBD...
     #
     # drive pwm?
